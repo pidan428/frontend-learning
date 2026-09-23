@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>v-cloak 演示</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 14px;
+        font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        font-size: 14px;
+        color: #303133;
+        background: #fff;
+      }
+
+      /* 配套规则：挂载完成前，把带 v-cloak 的挂载点整个隐藏 */
+      [v-cloak] {
+        display: none;
+      }
+
+      .box {
+        padding: 12px 14px;
+        border-radius: 8px;
+        background: #f5f7fa;
+        line-height: 2;
+      }
+
+      .box p {
+        margin: 0;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 10px;
+        background: #ecf5ff;
+        color: #409eff;
+        font-size: 12px;
+      }
+
+      .loading {
+        color: #909399;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      这个页面故意用 CDN 的方式引入 Vue：
+      模板先被浏览器渲染出来，1.2 秒后 Vue 才接管。
+      ?mode=cloak 的窗口给挂载点加了 v-cloak，整个过程看不到原始模板；
+      ?mode=raw 的窗口没加，会先闪出一段没被替换的双大括号。
+    -->
+    <div id="app">
+      <div class="box">
+        <p><span class="tag">{{ badge }}</span></p>
+        <p>{{ message }}</p>
+        <p class="loading">{{ status }}</p>
+      </div>
+    </div>
+
+    <script src="/vue.global.js"></script>
+    <script>
+      var params = new URLSearchParams(window.location.search);
+      var mode = params.get("mode") === "cloak" ? "cloak" : "raw";
+
+      // 用普通 DOM 操作给挂载点加 v-cloak 属性（因为此刻 Vue 还没运行）
+      var mountEl = document.getElementById("app");
+      if (mode === "cloak") {
+        mountEl.setAttribute("v-cloak", "");
+      }
+
+      // 模拟「1.2 秒之后才拿到数据」
+      setTimeout(function () {
+        Vue.createApp({
+          data: function () {
+            return {
+              badge: "已加载",
+              message: "你好，这句话是 Vue 渲染出来的。",
+              status: "数据到达时间：" + new Date().toLocaleTimeString(),
+            };
+          },
+        }).mount("#app");
+      }, 1200);
+    </script>
+  </body>
+</html>
